@@ -1,0 +1,268 @@
+openapi: 3.0.3
+info:
+  title: AInspire API
+  version: 1.0.0
+  description: Taste-first visual preference learning platform APIs.
+servers:
+  - url: https://api.ainspire.com/v1
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SessionStartRequest:
+      type: object
+      required: [artifact_type]
+      properties:
+        artifact_type:
+          type: string
+          enum: [poster, tattoo, logo, painting, storyboard, ui_design, album_cover, game_concept_art, illustration, brand_identity]
+        vibe_chips:
+          type: array
+          items:
+            type: string
+        constraints:
+          type: object
+          additionalProperties: true
+    Session:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        artifact_type: { type: string }
+        vibe_chips:
+          type: array
+          items: { type: string }
+        started_at: { type: string, format: date-time }
+    FeedImage:
+      type: object
+      properties:
+        image_id: { type: string, format: uuid }
+        url: { type: string }
+        score: { type: number }
+        explanation:
+          type: object
+          additionalProperties: true
+        attributes:
+          type: object
+          additionalProperties: true
+    FeedResponse:
+      type: object
+      properties:
+        session_id: { type: string, format: uuid }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedImage'
+    InteractionRequest:
+      type: object
+      required: [session_id, action_type]
+      properties:
+        session_id: { type: string, format: uuid }
+        image_id: { type: string, format: uuid }
+        action_type:
+          type: string
+          enum: [like, dislike, save, more_like_this, less_like_this, this_or_that]
+        comparison_image_id: { type: string, format: uuid }
+        attribute_feedback:
+          type: array
+          items:
+            type: object
+            properties:
+              attribute:
+                type: string
+                enum: [palette, composition, linework, texture, realism, typography, density]
+              sentiment:
+                type: string
+                enum: [positive, negative]
+              value:
+                type: number
+        client_timestamp:
+          type: string
+          format: date-time
+    BoardCreateRequest:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+    GenerationRequest:
+      type: object
+      required: [session_id]
+      properties:
+        session_id: { type: string, format: uuid }
+        mode:
+          type: string
+          enum: [final_pack, quick_variation]
+          default: final_pack
+    GenerationResponse:
+      type: object
+      properties:
+        job_id: { type: string, format: uuid }
+        status: { type: string, enum: [queued, running, completed, failed] }
+    StylePack:
+      type: object
+      properties:
+        style_id: { type: string }
+        palette:
+          type: array
+          items: { type: string }
+        typography_direction: { type: string }
+        texture_keywords:
+          type: array
+          items: { type: string }
+        layout_pattern: { type: string }
+        prompt_abstraction: { type: string }
+        top_references:
+          type: array
+          items: { type: string, format: uuid }
+paths:
+  /sessions/start:
+    post:
+      summary: Start a new taste-learning session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionStartRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+  /feed:
+    get:
+      summary: Get ranked feed for a session.
+      parameters:
+        - in: query
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: limit
+          required: false
+          schema: { type: integer, default: 10, maximum: 30 }
+      responses:
+        '200':
+          description: Ranked images
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+
+  /interactions:
+    post:
+      summary: Record user interaction and update taste state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InteractionRequest'
+      responses:
+        '202':
+          description: Interaction accepted
+
+  /boards:
+    post:
+      summary: Create board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardCreateRequest'
+      responses:
+        '201':
+          description: Board created
+
+  /boards/{board_id}/items:
+    post:
+      summary: Save image to board.
+      parameters:
+        - in: path
+          name: board_id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image_id]
+              properties:
+                image_id: { type: string, format: uuid }
+                saved_reason: { type: string }
+      responses:
+        '201':
+          description: Board item saved
+
+  /generate/final-pack:
+    post:
+      summary: Trigger final generation pack.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerationRequest'
+      responses:
+        '202':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationResponse'
+
+  /style-pack/{session_id}:
+    get:
+      summary: Get generated style pack for session.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Style pack
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StylePack'
+
+  /moderation/check:
+    post:
+      summary: Check text/image content against moderation policy.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+                image_url: { type: string }
+                context: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Moderation decision
+
+  /analytics/session/{session_id}:
+    get:
+      summary: Get session-level analytics summary.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Session analytics

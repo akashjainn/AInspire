@@ -1,0 +1,117 @@
+erDiagram
+    ORGS ||--o{ USERS : has
+    ORGS ||--o{ SESSIONS : owns
+    USERS ||--o{ SESSIONS : starts
+    SESSIONS ||--o{ INTERACTIONS : records
+    USERS ||--o{ BOARDS : owns
+    BOARDS ||--o{ BOARD_ITEMS : contains
+    IMAGES ||--o{ BOARD_ITEMS : referenced_by
+    IMAGES ||--o{ IMAGE_ATTRIBUTES : described_by
+    SESSIONS ||--o{ GENERATION_JOBS : triggers
+    USERS ||--o{ AUDIT_LOGS : creates
+
+    ORGS {
+      uuid id PK
+      string name
+      string plan_tier
+      datetime created_at
+    }
+
+    USERS {
+      uuid id PK
+      uuid org_id FK
+      string email
+      string role
+      json consent_flags
+      datetime created_at
+    }
+
+    SESSIONS {
+      uuid id PK
+      uuid tenant_id
+      uuid user_id FK
+      string artifact_type
+      json vibe_chips
+      vector session_vector
+      datetime started_at
+      datetime ended_at
+    }
+
+    IMAGES {
+      uuid id PK
+      uuid tenant_id
+      string source_type
+      string storage_url
+      string embedding_id
+      string license_type
+      string provenance
+      string moderation_status
+      json metadata_json
+      datetime created_at
+    }
+
+    IMAGE_ATTRIBUTES {
+      uuid id PK
+      uuid image_id FK
+      string palette
+      string composition_type
+      string linework
+      string texture
+      float realism_score
+      float density_score
+      bool typography_present
+      json tags
+    }
+
+    INTERACTIONS {
+      uuid id PK
+      uuid tenant_id
+      uuid session_id FK
+      uuid image_id FK
+      string action_type
+      string attribute_type
+      float value
+      json payload
+      datetime created_at
+    }
+
+    BOARDS {
+      uuid id PK
+      uuid tenant_id
+      uuid user_id FK
+      string title
+      datetime created_at
+    }
+
+    BOARD_ITEMS {
+      uuid id PK
+      uuid board_id FK
+      uuid image_id FK
+      string saved_reason
+      int order_index
+      datetime created_at
+    }
+
+    GENERATION_JOBS {
+      uuid id PK
+      uuid tenant_id
+      uuid session_id FK
+      string model_provider
+      json prompt_payload
+      int seed
+      string status
+      float cost_usd
+      string moderation_status
+      datetime created_at
+    }
+
+    AUDIT_LOGS {
+      uuid id PK
+      uuid tenant_id
+      uuid user_id FK
+      string action
+      string resource_type
+      string resource_id
+      json metadata
+      datetime created_at
+    }

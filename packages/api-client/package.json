@@ -1,0 +1,16 @@
+{
+  "name": "@ainspire/api-client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@ainspire/types": "workspace:*"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.3"
+  },
+  "scripts": {
+    "generate:types": "openapi-typescript ../../docs/openapi.yaml -o src/generated-types.ts"
+  }
+}
