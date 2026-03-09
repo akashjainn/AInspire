@@ -31,6 +31,19 @@ Taste-first visual preference learning platform.
 6. Run all services/apps:
    - `pnpm dev`
 
+## One-command Bootstrap
+- macOS/Linux:
+   - `bash scripts/bootstrap.sh`
+- Windows PowerShell:
+   - `./scripts/bootstrap.ps1`
+
+## CI
+- GitHub Actions workflow: `.github/workflows/ci.yml`
+- Runs on push/PR to `main`
+- Checks:
+   - Node workspace install + typecheck + build
+   - Python ML service dependency install + syntax smoke test
+
 ## Default Ports
 - API Gateway: `4000`
 - Session Service: `4001`
