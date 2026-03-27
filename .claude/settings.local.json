@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude remote-control:*)",
+      "Bash(claude plugin:*)",
+      "Bash(claude:*)",
+      "Bash(npx -y @figma/mcp-server --help)",
+      "Bash(curl -s http://127.0.0.1:3333/mcp)",
+      "Skill(update-config)",
+      "Bash(grep -E \"^C:/Users/akash/Documents/AInspire/[^/]+/package.json$\")",
+      "Bash(find ~/.claude/plugins -name *.json)",
+      "Bash(pnpm --filter web typecheck)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm --filter web build)"
+    ]
+  }
+}

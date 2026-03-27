@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -8,42 +7,38 @@ interface HeaderProps {
   showSubtitle?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  onMenuClick, 
+export const Header: React.FC<HeaderProps> = ({
+  onMenuClick,
   title = 'AInspire',
-  showSubtitle = true 
+  showSubtitle = true,
 }) => {
   return (
     <header className={styles.header}>
-      <button 
+      <button
         className={styles.menuButton}
         onClick={onMenuClick}
-        aria-label="Menu"
+        aria-label="Open menu"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
+        <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+          <rect width="22" height="2.5" rx="1.25" fill="#2D2A26" />
+          <rect y="6.75" width="22" height="2.5" rx="1.25" fill="#2D2A26" />
+          <rect y="13.5" width="22" height="2.5" rx="1.25" fill="#2D2A26" />
         </svg>
       </button>
-      
+
       <div className={styles.titleArea}>
-        <h1 className={styles.title}>
-          {title}
-          <span className={styles.sparkle}>
-            <Image 
-              src="/sparkle.svg" 
-              alt="sparkle" 
-              width={24} 
-              height={24}
-              priority
-            />
-          </span>
-        </h1>
+        <h1 className={styles.title}>{title}</h1>
         {showSubtitle && <p className={styles.subtitle}>Create with AI</p>}
       </div>
-      
-      <div className={styles.spacer} />
+
+      <button className={styles.profileButton} aria-label="Profile">
+        <span className={styles.profileRing}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="white" />
+          </svg>
+        </span>
+      </button>
     </header>
   );
 };

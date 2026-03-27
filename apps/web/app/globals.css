@@ -1,5 +1,5 @@
-* { 
-  box-sizing: border-box; 
+* {
+  box-sizing: border-box;
 }
 
 html, body {
@@ -11,159 +11,75 @@ html, body {
 
 body {
   font-family: var(--font-sora), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  background: #F5F3F0;
-  color: #1a1a1a;
+  background: #FFF7ED;
+  color: #2D2A26;
   min-height: 100vh;
   overflow-x: hidden;
 }
+
 button {
   cursor: pointer;
   border: none;
   padding: 12px 20px;
   border-radius: 12px;
-  background: #FF7F7F;
+  background: #FF6B6B;
   color: white;
   font-weight: 600;
   font-size: 15px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: inherit;
+  font-family: var(--font-sora), inherit;
 }
 
 button:hover {
-  background: #FF6B6B;
-  box-shadow: 0 4px 12px rgba(255, 127, 127, 0.3);
-  transform: translateY(-2px);
+  background: #e85555;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  transform: translateY(-1px);
 }
 
 button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 127, 127, 0.2);
+  box-shadow: 0 2px 6px rgba(255, 107, 107, 0.2);
 }
 
 button:disabled {
   background: #D9D6D3;
+  color: #999;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
-.container { 
-  max-width: 1200px; 
-  margin: 0 auto; 
-  padding: 24px 16px;
-}
 
-.grid { 
-  display: grid; 
-  gap: 16px; 
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-}
-
-.card {
-  background: #FFFFFF;
-  border: 2px solid #FF7F7F;
-  border-radius: 16px;
-  padding: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: #FF6B6B;
-  transform: translateY(-4px);
-}
-
-.card.selected {
-  border-color: #FF6B6B;
-  background: rgba(255, 127, 127, 0.05);
-  box-shadow: 0 0 20px rgba(255, 127, 127, 0.25);
-}
-.chips { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 8px; 
-}
-
-.chip {
-  padding: 8px 14px;
-  border: 1px solid #E8E6E3;
-  border-radius: 999px;
-  background: #FFFFFF;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #1a1a1a;
-}
-
-.chip:hover {
-  border-color: #FF7F7F;
-  background: rgba(255, 127, 127, 0.05);
-}
-
-.chip.active {
-  background: #FF7F7F;
-  color: #FFFFFF;
-  border-color:#FF7F7F;
-}
-.sidebar { border-left: 1px solid #ddd; padding-left: 12px; }
-.layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
-
-h1 {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
-}
-
-h2 {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  color: #1a1a1a;
-  letter-spacing: -0.3px;
-}
-
-h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  color: #1a1a1a;
-}
-
-/* Shooting Mechanics Styles */
+/* ShootableCard / DesignEliminationView global styles */
 .elimination-view {
-  margin: 24px 0;
+  margin: 16px 0;
   width: 100%;
 }
 
 .elimination-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .elimination-header h2 {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
-  margin: 0 0 8px 0;
-  color: #111;
-  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  color: #2D2A26;
+  font-family: var(--font-sora), sans-serif;
 }
 
 .elimination-header p {
-  color: #666;
+  color: rgba(45, 42, 38, 0.55);
   margin: 0;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 400;
 }
 
 .elimination-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin: 24px 0;
+  gap: 12px;
+  margin: 16px 0;
 }
 
 .shootable-card {
@@ -171,16 +87,16 @@ h3 {
   cursor: crosshair;
   overflow: hidden;
   border-radius: 16px;
-  background: #fff;
-  border: 2px solid #e6e6e8;
-  transition: all 0.3s ease;
-  aspect-ratio: 3 / 4;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  background: #F1EDE5;
+  border: 1px solid rgba(45, 42, 38, 0.1);
+  transition: all 0.25s ease;
+  aspect-ratio: 3 / 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .shootable-card:hover {
-  border-color: #999;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 107, 107, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
   transform: translateY(-2px);
 }
 
@@ -193,13 +109,13 @@ h3 {
 
 .crosshair {
   position: absolute;
-  width: 45px;
-  height: 45px;
-  border: 3px solid rgb(255, 60, 60);
+  width: 42px;
+  height: 42px;
+  border: 2.5px solid #FF6B6B;
   border-radius: 50%;
   pointer-events: none;
   z-index: 10;
-  box-shadow: 0 0 15px rgba(255, 60, 60, 0.6), inset 0 0 10px rgba(255, 60, 60, 0.3);
+  box-shadow: 0 0 12px rgba(255, 107, 107, 0.55), inset 0 0 8px rgba(255, 107, 107, 0.25);
   transform: translate(-50%, -50%);
 }
 
@@ -209,10 +125,10 @@ h3 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 3px;
-  height: 16px;
-  background: rgb(255, 60, 60);
-  border-radius: 2px;
+  width: 2px;
+  height: 14px;
+  background: #FF6B6B;
+  border-radius: 1px;
 }
 
 .crosshair::after {
@@ -221,10 +137,10 @@ h3 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 16px;
-  height: 3px;
-  background: rgb(255, 60, 60);
-  border-radius: 2px;
+  width: 14px;
+  height: 2px;
+  background: #FF6B6B;
+  border-radius: 1px;
 }
 
 .explosion-particle {
@@ -233,109 +149,19 @@ h3 {
 
 .elimination-loading {
   text-align: center;
-  padding: 96px 24px;
-  color: #666;
-  font-size: 16px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .container {
-    padding: 16px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  h3 {
-    font-size: 16px;
-  }
-
-  .elimination-container {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .shootable-card {
-    aspect-ratio: 9 / 12;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  }
-
-  .shootable-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
-  }
-
-  .elimination-header h2 {
-    font-size: 24px;
-  }
-
-  .elimination-header p {
-    font-size: 13px;
-  }
-
-  .elimination-header {
-    margin-bottom: 20px;
-  }
-
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    border-left: none;
-    border-top: 1px solid #ddd;
-    padding-left: 0;
-    padding-top: 16px;
-  }
-
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .chip {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
+  padding: 64px 16px;
+  color: rgba(45, 42, 38, 0.5);
+  font-size: 14px;
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 12px;
-  }
-
-  h1 {
-    font-size: 20px;
-    margin-bottom: 4px;
-  }
-
-  .elimination-header h2 {
-    font-size: 20px;
-  }
-
-  .elimination-header p {
-    font-size: 12px;
-  }
-
   .crosshair {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-width: 2px;
   }
 
-  .shootable-card {
-    border-radius: 10px;
+  .elimination-container {
+    gap: 10px;
   }
 }

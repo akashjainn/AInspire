@@ -3,42 +3,57 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
 
 .label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #2D2A26;
+  margin-bottom: 8px;
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: 0.3px;
+  opacity: 0.7;
+  text-transform: uppercase;
 }
 
 .trigger {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 18px 13px 18px 27px;
-  background: #FFFFFF;
-  border: 2px solid #FF7F7F;
+  padding: 0 18px;
+  background: #F1EDE5;
+  border: 1px solid #FF6B6B;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 15px;
-  font-weight: 500;
-  color: #1a1a1a;
-  min-height: 48px;
-  gap: 29px;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+  font-size: 14px;
+  font-weight: 400;
+  color: #2D2A26;
+  height: 60px;
+  gap: 10px;
+  width: 100%;
+  font-family: var(--font-sora), sans-serif;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .trigger:hover {
-  border-color: #FF6B6B;
-  background-color: #FEFDFB;
+  background: #ece7de;
+  border-color: #e85555;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.trigger:active {
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .trigger.open {
-  border-color: #FF6B6B;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  background-color: #FEFDFB;
+  border-bottom-color: transparent;
+  background: #F1EDE5;
 }
 
 .trigger.open .icon {
@@ -48,6 +63,7 @@
 .text {
   flex: 1;
   text-align: left;
+  line-height: 1;
 }
 
 .icon {
@@ -56,33 +72,31 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  color: #FF7F7F;
+  color: #2D2A26;
   flex-shrink: 0;
   transition: transform 0.2s ease;
-  margin-left: 8px;
+  opacity: 0.6;
 }
 
 .menu {
   position: absolute;
-  top: calc(100% - 2px);
+  top: calc(100% - 1px);
   left: 0;
   right: 0;
-  background: #FFFFFF;
-  border: 2px solid #FF7F7F;
+  background: #F1EDE5;
+  border: 1px solid #FF6B6B;
   border-top: none;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
-  max-height: 300px;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
   z-index: 1000;
-  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideDown 0.16s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -92,35 +106,46 @@
 
 .option {
   width: 100%;
-  padding: 12px 16px;
-  background: transparent;
+  padding: 14px 18px;
+  background: transparent !important;
   border: none;
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  transition: all 0.15s ease;
+  font-weight: 400;
+  color: #2D2A26;
+  transition: background-color 0.14s ease;
   display: block;
+  font-family: var(--font-sora), sans-serif;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .option:hover {
-  background-color: rgba(255, 127, 127, 0.08);
+  background-color: rgba(255, 107, 107, 0.1) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.option:active {
+  background-color: rgba(255, 107, 107, 0.18) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .option.selected {
-  background-color: #FF7F7F;
-  color: #FFFFFF;
-  font-weight: 600;
+  background-color: #FF6B6B !important;
+  color: white;
+  font-weight: 700;
 }
 
 .option.selected:hover {
-  background-color: #FF6B6B;
+  background-color: #e85555 !important;
 }
 
-/* Scrollbar styling */
 .menu::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .menu::-webkit-scrollbar-track {
@@ -128,21 +153,6 @@
 }
 
 .menu::-webkit-scrollbar-thumb {
-  background: rgba(255, 127, 127, 0.3);
-  border-radius: 3px;
-}
-
-.menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 127, 127, 0.5);
-}
-
-@media (max-width: 640px) {
-  .trigger {
-    padding: 12px 14px;
-    font-size: 14px;
-  }
-
-  .option {
-    padding: 10px 14px;
-  }
+  background: rgba(255, 107, 107, 0.3);
+  border-radius: 2px;
 }

@@ -5,8 +5,8 @@
   gap: 8px;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
-  font-family: inherit;
+  font-weight: 700;
+  font-family: var(--font-sora), inherit;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
@@ -15,51 +15,56 @@
 
 /* Variants */
 .primary {
-  background: #FF7F7F;
+  background: #FF6B6B;
   color: #FFFFFF;
 }
 
 .primary:hover:not(:disabled) {
-  background: #FF6B6B;
-  box-shadow: 0 4px 12px rgba(255, 127, 127, 0.3);
-  transform: translateY(-2px);
+  background: #e85555;
+  box-shadow: 0 4px 14px rgba(255, 107, 107, 0.35);
+  transform: translateY(-1px);
 }
 
 .primary:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 127, 127, 0.2);
+  box-shadow: 0 2px 6px rgba(255, 107, 107, 0.2);
 }
 
 .secondary {
   background: transparent;
-  color: #FF7F7F;
-  border: 2px solid #FF7F7F;
+  color: #FF6B6B;
+  border: 1.5px solid #FF6B6B;
 }
 
 .secondary:hover:not(:disabled) {
-  background: rgba(255, 127, 127, 0.08);
-  border-color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.07);
+  border-color: #e85555;
 }
 
 .secondary:active:not(:disabled) {
-  background: rgba(255, 127, 127, 0.12);
+  background: rgba(255, 107, 107, 0.13);
 }
 
 .outline {
   background: transparent;
-  color: #1a1a1a;
-  border: 1px solid #E8E6E3;
+  color: #2D2A26;
+  border: 1.5px solid rgba(45, 42, 38, 0.2);
 }
 
 .outline:hover:not(:disabled) {
-  background: #F5F3F0;
-  border-color: #FF7F7F;
+  background: rgba(45, 42, 38, 0.05);
+  border-color: rgba(45, 42, 38, 0.35);
+}
+
+.outline:active:not(:disabled) {
+  background: rgba(45, 42, 38, 0.08);
 }
 
 /* Sizes */
 .sm {
-  padding: 8px 12px;
+  padding: 8px 14px;
   font-size: 13px;
+  border-radius: 10px;
 }
 
 .md {
@@ -68,15 +73,17 @@
 }
 
 .lg {
-  padding: 14px 28px;
-  font-size: 16px;
-  min-height: 48px;
+  padding: 16px 28px;
+  font-size: 15px;
+  min-height: 56px;
+  border-radius: 16px;
+  letter-spacing: 0.1px;
 }
 
-/* Disabled state */
+/* Disabled */
 .button:disabled {
   background: #D9D6D3;
-  color: #999999;
+  color: #999;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -107,22 +114,6 @@
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 640px) {
-  .md {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .lg {
-    padding: 12px 20px;
-    font-size: 15px;
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
