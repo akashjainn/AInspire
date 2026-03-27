@@ -44,6 +44,12 @@ Taste-first visual preference learning platform.
    - Node workspace install + typecheck + build
    - Python ML service dependency install + syntax smoke test
 
+## Vercel Deployment (Web App)
+- Import this repository in Vercel as a monorepo project.
+- Set **Root Directory** to the repository root (leave it empty).
+- Keep framework preset as `Next.js`.
+- This repo-level `vercel.json` is configured for monorepo install/build and should not use `outputDirectory`.
+
 ## Default Ports
 - API Gateway: `4000`
 - Session Service: `4001`

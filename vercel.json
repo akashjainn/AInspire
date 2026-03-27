@@ -1,8 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm --filter=@ainspire/web run build",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install --filter=@ainspire/web..."
+  "buildCommand": "if [ -d apps/web ]; then cd apps/web; fi; pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile"
 }
 
 
