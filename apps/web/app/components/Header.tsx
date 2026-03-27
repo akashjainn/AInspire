@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -29,7 +30,15 @@ export const Header: React.FC<HeaderProps> = ({
       <div className={styles.titleArea}>
         <h1 className={styles.title}>
           {title}
-          <span className={styles.sparkle}>✨</span>
+          <span className={styles.sparkle}>
+            <Image 
+              src="/sparkle.svg" 
+              alt="sparkle" 
+              width={24} 
+              height={24}
+              priority
+            />
+          </span>
         </h1>
         {showSubtitle && <p className={styles.subtitle}>Create with AI</p>}
       </div>
