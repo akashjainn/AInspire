@@ -1,17 +1,20 @@
 import React from 'react';
-import Image from 'next/image';
 import styles from './Header.module.css';
 
 interface HeaderProps {
   onMenuClick?: () => void;
+  onHomeClick?: () => void;
   title?: string;
   showSubtitle?: boolean;
+  isHome?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onMenuClick,
+  onHomeClick,
   title = 'AInspire',
   showSubtitle = true,
+  isHome = true,
 }) => {
   return (
     <header className={styles.header}>
@@ -27,15 +30,29 @@ export const Header: React.FC<HeaderProps> = ({
         </svg>
       </button>
 
+      <button
+        className={styles.homeButton}
+        onClick={onHomeClick}
+        aria-label="Home"
+        title="Back to home"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+          <path d="M3 21v-5h5" />
+        </svg>
+      </button>
+
       <div className={styles.titleArea}>
         <div className={styles.titleContent}>
           <div className={styles.iconWrapper}>
-            <Image
-              src="/frame.png"
+            <img
+              src="/frame.svg"
               alt="AInspire"
-              width={28}
-              height={28}
-              priority
+              width="28"
+              height="28"
+              className={styles.icon}
             />
           </div>
           <h1 className={styles.title}>{title}</h1>

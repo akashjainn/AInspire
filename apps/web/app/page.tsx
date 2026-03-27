@@ -13,6 +13,25 @@ import styles from "./page.module.css";
 
 const api = new ApiClient(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000");
 
+// Test images for demo
+const TEST_IMAGES = [
+  "https://images.unsplash.com/photo-1579783902614-e3fb5141b0cb?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1561337404-35e76e6c9e0f?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1579783902614-e3fb5141b0cb?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1561337404-35e76e6c9e0f?w=400&h=300&fit=crop",
+];
+
+const TEST_GENERATED_IMAGES = [
+  "https://images.unsplash.com/photo-1579783902614-e3fb5141b0cb?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1561337404-35e76e6c9e0f?w=600&h=400&fit=crop",
+];
+
 const artifacts: Array<{ value: ArtifactType; label: string }> = [
   { value: "painting", label: "Painting" },
   { value: "illustration", label: "Cartoon" },
@@ -105,6 +124,27 @@ function SwipeCard({ item, onAction, isSaved }: SwipeCardProps) {
   );
 }
 
+// ─── Breadcrumb Navigation ────────────────────────────────────────────────────
+
+interface BreadcrumbProps {
+  currentScreen: Screen;
+}
+
+function Breadcrumb({ currentScreen }: BreadcrumbProps) {
+  const breadcrumbs: Record<Screen, string> = {
+    creation: "Home",
+    elimination: "Elimination",
+    inspiration: "Inspiration",
+    choosestyles: "Results",
+  };
+
+  return (
+    <div className={styles.breadcrumb}>
+      <span className={styles.breadcrumbItem}>{breadcrumbs[currentScreen]}</span>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
@@ -119,20 +159,42 @@ export default function HomePage() {
   const [useEliminationView, setUseEliminationView] = useState(false);
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
   const [artworkSaved, setArtworkSaved] = useState<Set<string>>(new Set());
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const canGenerate = saved.length >= 5 && interactions >= 20;
   const progressPercent = Math.min(100, Math.round((interactions / 20) * 100));
   const savedItems = feed.filter((f) => saved.includes(f.image_id));
   const selectedArtwork = feed.find((f) => f.image_id === selectedArtworkId) ?? null;
 
+  // Generate test feed items
+  function generateTestFeed() {
+    return TEST_IMAGES.map((url, i) => ({
+      image_id: `test-${i}`,
+      url,
+      rank: i,
+    }));
+  }
+
+  // Generate test generated items
+  function generateTestGeneratedItems() {
+    return TEST_GENERATED_IMAGES.map((url, i) => ({
+      image_id: `generated-${i}`,
+      url,
+      rank: i,
+    }));
+  }
+
   async function startSession() {
     try {
       const session = await api.startSession({ artifact_type: artifact, vibe_chips: selectedChips });
       setSessionId(session.id);
-      const response = await api.getFeed(session.id, 10);
-      setFeed(response.items);
+      // Use test feed for demo
+      const testFeed = generateTestFeed();
+      setFeed(testFeed as any);
     } catch {
-      // demo mode — navigate anyway
+      // Demo mode — use test feed
+      const testFeed = generateTestFeed();
+      setFeed(testFeed as any);
     }
     setCurrentScreen("elimination");
   }
@@ -150,14 +212,18 @@ export default function HomePage() {
         action_type: action,
         comparison_image_id: comparisonId,
       });
-      const response = await api.getFeed(sessionId, 10);
-      setFeed(response.items);
+      // Use test feed for demo
+      const testFeed = generateTestFeed();
+      setFeed(testFeed as any);
     } catch {
-      // continue
+      // Demo mode — use test feed
+      const testFeed = generateTestFeed();
+      setFeed(testFeed as any);
     }
   }
 
   async function generateFinalPack() {
+    setIsGenerating(true);
     if (sessionId) {
       try {
         await api.generateFinalPack(sessionId);
@@ -165,7 +231,13 @@ export default function HomePage() {
         // continue
       }
     }
-    setCurrentScreen("choosestyles");
+    // Simulate generation delay
+    setTimeout(() => {
+      const testGenerated = generateTestGeneratedItems();
+      setFeed(testGenerated as any);
+      setIsGenerating(false);
+      setCurrentScreen("choosestyles");
+    }, 1500);
   }
 
   function toggleSaveArtwork(id: string) {
@@ -175,6 +247,19 @@ export default function HomePage() {
       else next.add(id);
       return next;
     });
+  }
+
+  function goHome() {
+    setCurrentScreen("creation");
+    setArtifact("painting");
+    setSelectedChips([]);
+    setSessionId("");
+    setFeed([]);
+    setSaved([]);
+    setInteractions(0);
+    setSelectedArtworkId(null);
+    setArtworkSaved(new Set());
+    setSidebarOpen(false);
   }
 
   const sidebarItems = [
@@ -196,12 +281,18 @@ export default function HomePage() {
   return (
     <div className={styles.root}>
       <div className={styles.app}>
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <Header
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          onHomeClick={goHome}
+          isHome={currentScreen !== "creation"}
+        />
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           items={sidebarItems}
         />
+
+        <Breadcrumb currentScreen={currentScreen} />
 
         <main className={styles.main}>
           <AnimatePresence mode="wait">
@@ -358,8 +449,8 @@ export default function HomePage() {
 
                   <div className={styles.ctaGroup}>
                     {canGenerate ? (
-                      <Button size="lg" fullWidth onClick={generateFinalPack}>
-                        Generate Artwork from Inspiration →
+                      <Button size="lg" fullWidth onClick={generateFinalPack} disabled={isGenerating}>
+                        {isGenerating ? "Generating..." : "Generate Artwork from Inspiration →"}
                       </Button>
                     ) : (
                       <Button
