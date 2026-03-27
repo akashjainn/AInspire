@@ -1,10 +1,278 @@
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, sans-serif; background: #f7f7f8; color: #111; }
-button { cursor: pointer; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+  color: #111;
+  min-height: 100vh;
+}
+button {
+  cursor: pointer;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #007AFF;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+button:hover {
+  background: #0051D5;
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(0);
+}
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
 .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-.card { background: #fff; border: 1px solid #e6e6e8; border-radius: 10px; padding: 10px; }
+.card {
+  background: #fff;
+  border: 1px solid #e6e6e8;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: #ddd;
+}
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { padding: 6px 10px; border: 1px solid #ccc; border-radius: 999px; background: #fff; }
+.chip {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.chip:hover {
+  border-color: #999;
+  background: #f5f5f5;
+}
 .sidebar { border-left: 1px solid #ddd; padding-left: 12px; }
 .layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+/* Shooting Mechanics Styles */
+.elimination-view {
+  margin: 24px 0;
+  width: 100%;
+}
+
+.elimination-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.elimination-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111;
+  letter-spacing: -0.5px;
+}
+
+.elimination-header p {
+  color: #666;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.elimination-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin: 24px 0;
+}
+
+.shootable-card {
+  position: relative;
+  cursor: crosshair;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  border: 2px solid #e6e6e8;
+  transition: all 0.3s ease;
+  aspect-ratio: 3 / 4;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.shootable-card:hover {
+  border-color: #999;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.shootable-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.crosshair {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border: 3px solid rgb(255, 60, 60);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 0 15px rgba(255, 60, 60, 0.6), inset 0 0 10px rgba(255, 60, 60, 0.3);
+  transform: translate(-50%, -50%);
+}
+
+.crosshair::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 16px;
+  background: rgb(255, 60, 60);
+  border-radius: 2px;
+}
+
+.crosshair::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 3px;
+  background: rgb(255, 60, 60);
+  border-radius: 2px;
+}
+
+.explosion-particle {
+  z-index: 20;
+}
+
+.elimination-loading {
+  text-align: center;
+  padding: 96px 24px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
+  .elimination-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .shootable-card {
+    aspect-ratio: 9 / 12;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .shootable-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .elimination-header h2 {
+    font-size: 24px;
+  }
+
+  .elimination-header p {
+    font-size: 13px;
+  }
+
+  .elimination-header {
+    margin-bottom: 20px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-left: none;
+    border-top: 1px solid #ddd;
+    padding-left: 0;
+    padding-top: 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .chip {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .elimination-header h2 {
+    font-size: 20px;
+  }
+
+  .elimination-header p {
+    font-size: 12px;
+  }
+
+  .crosshair {
+    width: 36px;
+    height: 36px;
+    border-width: 2px;
+  }
+
+  .shootable-card {
+    border-radius: 10px;
+  }
+}

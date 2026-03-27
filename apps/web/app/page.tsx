@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ApiClient } from "@ainspire/api-client";
 import type { ArtifactType, FeedItem, InteractionAction } from "@ainspire/types";
+import DesignEliminationView from "./components/DesignEliminationView";
 
 const api = new ApiClient(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000");
 
@@ -29,6 +30,7 @@ export default function HomePage() {
   const [saved, setSaved] = useState<string[]>([]);
   const [interactions, setInteractions] = useState(0);
   const [jobStatus, setJobStatus] = useState<string>("");
+  const [useEliminationView, setUseEliminationView] = useState(false);
 
   const canGenerate = saved.length >= 5 && interactions >= 20;
 
@@ -41,10 +43,15 @@ export default function HomePage() {
     setFeed(response.items);
   }
 
-  async function react(imageId: string, action: InteractionAction) {
+  async function react(imageId: string, action: InteractionAction, comparisonImageId?: string) {
     if (!sessionId) return;
 
-    await api.recordInteraction({ session_id: sessionId, image_id: imageId, action_type: action });
+    await api.recordInteraction({
+      session_id: sessionId,
+      image_id: imageId,
+      action_type: action,
+      comparison_image_id: comparisonImageId
+    });
     setInteractions((value) => value + 1);
 
     if (action === "save") {
@@ -95,20 +102,32 @@ export default function HomePage() {
 
       <div className="layout">
         <div>
-          <h3>Image Card Stack</h3>
-          <div className="grid">
-            {feed.map((item) => (
-              <div className="card" key={item.image_id}>
-                <img src={item.url} alt="candidate" style={{ width: "100%", borderRadius: 8 }} />
-                <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                  <button onClick={() => react(item.image_id, "like")}>Like</button>
-                  <button onClick={() => react(item.image_id, "dislike")}>Dislike</button>
-                  <button onClick={() => react(item.image_id, "save")}>Save</button>
-                  <button onClick={() => react(item.image_id, "this_or_that")}>This/That</button>
-                </div>
-              </div>
-            ))}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3>Image Card Stack</h3>
+            {sessionId && (
+              <button onClick={() => setUseEliminationView(!useEliminationView)}>
+                {useEliminationView ? "Switch to Browse" : "Try Shooting"}
+              </button>
+            )}
           </div>
+
+          {useEliminationView && sessionId ? (
+            <DesignEliminationView sessionId={sessionId} onInteraction={react} />
+          ) : (
+            <div className="grid">
+              {feed.map((item) => (
+                <div className="card" key={item.image_id}>
+                  <img src={item.url} alt="candidate" style={{ width: "100%", borderRadius: 8 }} />
+                  <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                    <button onClick={() => react(item.image_id, "like")}>Like</button>
+                    <button onClick={() => react(item.image_id, "dislike")}>Dislike</button>
+                    <button onClick={() => react(item.image_id, "save")}>Save</button>
+                    <button onClick={() => react(item.image_id, "this_or_that")}>This/That</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <aside className="sidebar">
