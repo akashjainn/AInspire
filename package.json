@@ -12,6 +12,7 @@
     "db:seed": "node services/session-service/scripts/seed-corpus.mjs"
   },
   "devDependencies": {
+    "next": "15.0.0",
     "turbo": "^2.0.14"
   }
 }
