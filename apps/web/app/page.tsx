@@ -112,7 +112,10 @@ export default function HomePage() {
           </div>
 
           {useEliminationView && sessionId ? (
-            <DesignEliminationView sessionId={sessionId} onInteraction={react} />
+            <DesignEliminationView
+              sessionId={sessionId}
+              onInteraction={(action, imageId, comparisonImageId) => react(imageId, action, comparisonImageId)}
+            />
           ) : (
             <div className="grid">
               {feed.map((item) => (

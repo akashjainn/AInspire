@@ -39,7 +39,10 @@ const DesignEliminationView: React.FC<DesignEliminationViewProps> = ({ sessionId
     // Record the interaction: user eliminated (shot) the shotImageId
     // This means they preferred the otherImageId
     onInteraction("this_or_that", otherImageId, shotImageId);
-    loadNewPair();
+    // Small delay for animation to complete
+    setTimeout(() => {
+      loadNewPair();
+    }, 600);
   };
 
   if (isLoading || !pair) {
