@@ -1,8 +1,8 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd apps/web && pnpm run build",
+  "buildCommand": "pnpm --filter=@ainspire/web run build",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install --filter=@ainspire/web --filter=@ainspire/api-client --filter=@ainspire/types"
+  "installCommand": "pnpm install --filter=@ainspire/web..."
 }
 
 
