@@ -1,0 +1,128 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Variants */
+.primary {
+  background: #FF7F7F;
+  color: #FFFFFF;
+}
+
+.primary:hover:not(:disabled) {
+  background: #FF6B6B;
+  box-shadow: 0 4px 12px rgba(255, 127, 127, 0.3);
+  transform: translateY(-2px);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 127, 127, 0.2);
+}
+
+.secondary {
+  background: transparent;
+  color: #FF7F7F;
+  border: 2px solid #FF7F7F;
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(255, 127, 127, 0.08);
+  border-color: #FF6B6B;
+}
+
+.secondary:active:not(:disabled) {
+  background: rgba(255, 127, 127, 0.12);
+}
+
+.outline {
+  background: transparent;
+  color: #1a1a1a;
+  border: 1px solid #E8E6E3;
+}
+
+.outline:hover:not(:disabled) {
+  background: #F5F3F0;
+  border-color: #FF7F7F;
+}
+
+/* Sizes */
+.sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.md {
+  padding: 12px 20px;
+  font-size: 15px;
+}
+
+.lg {
+  padding: 14px 28px;
+  font-size: 16px;
+  min-height: 48px;
+}
+
+/* Disabled state */
+.button:disabled {
+  background: #D9D6D3;
+  color: #999999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border-color: #D9D6D3;
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}
+
+/* Icon */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .md {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .lg {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}

@@ -1,60 +1,111 @@
-* { box-sizing: border-box; }
-body {
+* { 
+  box-sizing: border-box; 
+}
+
+html, body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
-  color: #111;
+  background: #F5F3F0;
+  color: #1a1a1a;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 button {
   cursor: pointer;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  background: #007AFF;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: #FF7F7F;
   color: white;
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
 }
+
 button:hover {
-  background: #0051D5;
-  transform: translateY(-1px);
+  background: #FF6B6B;
+  box-shadow: 0 4px 12px rgba(255, 127, 127, 0.3);
+  transform: translateY(-2px);
 }
+
 button:active {
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 127, 127, 0.2);
 }
+
 button:disabled {
-  background: #ccc;
+  background: #D9D6D3;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
-.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.container { 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 24px 16px;
+}
+
+.grid { 
+  display: grid; 
+  gap: 16px; 
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
 .card {
-  background: #fff;
-  border: 1px solid #e6e6e8;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background: #FFFFFF;
+  border: 2px solid #FF7F7F;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
+
 .card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border-color: #ddd;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #FF6B6B;
+  transform: translateY(-4px);
 }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.card.selected {
+  border-color: #FF6B6B;
+  background: rgba(255, 127, 127, 0.05);
+  box-shadow: 0 0 20px rgba(255, 127, 127, 0.25);
+}
+.chips { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+}
+
 .chip {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border: 1px solid #E8E6E3;
   border-radius: 999px;
-  background: #fff;
+  background: #FFFFFF;
   font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
+  color: #1a1a1a;
 }
+
 .chip:hover {
-  border-color: #999;
-  background: #f5f5f5;
+  border-color: #FF7F7F;
+  background: rgba(255, 127, 127, 0.05);
+}
+
+.chip.active {
+  background: #FF7F7F;
+  color: #FFFFFF;
+  border-color:#FF7F7F;
 }
 .sidebar { border-left: 1px solid #ddd; padding-left: 12px; }
 .layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
@@ -63,11 +114,23 @@ h1 {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 8px 0;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
 }
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  letter-spacing: -0.3px;
+}
+
 h3 {
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 12px 0;
+  color: #1a1a1a;
 }
 
 /* Shooting Mechanics Styles */

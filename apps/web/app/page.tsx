@@ -4,20 +4,26 @@ import { useMemo, useState } from "react";
 import { ApiClient } from "@ainspire/api-client";
 import type { ArtifactType, FeedItem, InteractionAction } from "@ainspire/types";
 import DesignEliminationView from "./components/DesignEliminationView";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import Button from "./components/Button";
+import Dropdown from "./components/Dropdown";
+import Card from "./components/Card";
+import styles from "./page.module.css";
 
 const api = new ApiClient(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000");
 
-const artifacts: ArtifactType[] = [
-  "poster",
-  "tattoo",
-  "logo",
-  "painting",
-  "storyboard",
-  "ui_design",
-  "album_cover",
-  "game_concept_art",
-  "illustration",
-  "brand_identity"
+const artifacts: Array<{ value: ArtifactType; label: string }> = [
+  { value: "poster", label: "Poster" },
+  { value: "tattoo", label: "Tattoo" },
+  { value: "logo", label: "Logo" },
+  { value: "painting", label: "Painting" },
+  { value: "storyboard", label: "Storyboard" },
+  { value: "ui_design", label: "UI Design" },
+  { value: "album_cover", label: "Album Cover" },
+  { value: "game_concept_art", label: "Game Concept Art" },
+  { value: "illustration", label: "Illustration" },
+  { value: "brand_identity", label: "Brand Identity" },
 ];
 
 const chips = ["minimal", "surreal", "retro", "editorial", "cinematic", "anime", "brutalist", "luxury", "gothic", "psychedelic"];
@@ -31,9 +37,10 @@ export default function HomePage() {
   const [interactions, setInteractions] = useState(0);
   const [jobStatus, setJobStatus] = useState<string>("");
   const [useEliminationView, setUseEliminationView] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState<"creation" | "elimination" | "inspiration">("creation");
 
   const canGenerate = saved.length >= 5 && interactions >= 20;
-
   const progressText = useMemo(() => `${interactions}/20 interactions • ${saved.length}/5 saves`, [interactions, saved.length]);
 
   async function startSession() {
@@ -41,6 +48,7 @@ export default function HomePage() {
     setSessionId(session.id);
     const response = await api.getFeed(session.id, 10);
     setFeed(response.items);
+    setCurrentScreen("elimination");
   }
 
   async function react(imageId: string, action: InteractionAction, comparisonImageId?: string) {
@@ -66,87 +74,152 @@ export default function HomePage() {
     if (!sessionId) return;
     const response = await api.generateFinalPack(sessionId);
     setJobStatus(`Final pack queued: ${response.job_id}`);
+    setCurrentScreen("inspiration");
   }
 
+  const sidebarItems = [
+    { label: "View Saved", icon: "bookmark" as const },
+    { label: "Account", icon: "user" as const },
+    { label: "Archive", icon: "archive" as const },
+  ];
+
   return (
-    <div className="container">
-      <h1>AInspire MVP Loop</h1>
-      <p>Milestone: react to 20+ images, save at least 5, then generate final inspiration pack.</p>
+    <div className={styles.root}>
+      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} items={sidebarItems} />
 
-      <div className="card" style={{ marginBottom: 16 }}>
-        <h3>Artifact Selection</h3>
-        <select value={artifact} onChange={(e) => setArtifact(e.target.value as ArtifactType)}>
-          {artifacts.map((value) => (
-            <option value={value} key={value}>{value}</option>
-          ))}
-        </select>
+      {currentScreen === "creation" && (
+        <div className={styles.container}>
+          <div className={styles.centerContent}>
+            <div className={styles.card}>
+              <h2>What are you creating today?</h2>
+              
+              <div className={styles.formGroup}>
+                <Dropdown
+                  value={artifact}
+                  onChange={(val) => setArtifact(val as ArtifactType)}
+                  options={artifacts}
+                  label="Select artifact"
+                />
+              </div>
 
-        <h3>Vibe Chips</h3>
-        <div className="chips">
-          {chips.map((chip) => (
-            <button
-              key={chip}
-              className="chip"
-              style={{ background: selectedChips.includes(chip) ? "#dbeafe" : "#fff" }}
-              onClick={() => setSelectedChips((current) => current.includes(chip) ? current.filter((c) => c !== chip) : [...current, chip])}
-            >
-              {chip}
-            </button>
-          ))}
+              <div className={styles.section}>
+                <h3>Select your vibe</h3>
+                <div className={styles.chips}>
+                  {chips.map((chip) => (
+                    <button
+                      key={chip}
+                      className={`${styles.chip} ${selectedChips.includes(chip) ? styles.chipActive : ""}`}
+                      onClick={() =>
+                        setSelectedChips((current) =>
+                          current.includes(chip)
+                            ? current.filter((c) => c !== chip)
+                            : [...current, chip]
+                        )
+                      }
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.buttonGroup}>
+                <Button size="lg" fullWidth onClick={startSession}>
+                  Start Creating
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
 
-        <div style={{ marginTop: 12 }}>
-          <button onClick={startSession}>Start Session</button>
-        </div>
-      </div>
+      {currentScreen === "elimination" && (
+        <div className={styles.container}>
+          <div className={styles.eliminationSection}>
+            <div className={styles.sectionHeader}>
+              <h2>Eliminate styles you don't like</h2>
+              <p>Click or tap to remove styles, refine your taste</p>
+            </div>
 
-      <div className="layout">
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3>Image Card Stack</h3>
-            {sessionId && (
-              <button onClick={() => setUseEliminationView(!useEliminationView)}>
-                {useEliminationView ? "Switch to Browse" : "Try Shooting"}
-              </button>
+            {useEliminationView && sessionId ? (
+              <DesignEliminationView
+                sessionId={sessionId}
+                onInteraction={(action, imageId, comparisonImageId) =>
+                  react(imageId, action, comparisonImageId)
+                }
+              />
+            ) : (
+              <div className={styles.cardGrid}>
+                {feed.map((item) => (
+                  <Card
+                    key={item.image_id}
+                    image={item.url}
+                    selected={saved.includes(item.image_id)}
+                  >
+                    <div className={styles.cardActions}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => react(item.image_id, "like")}
+                      >
+                        ✓
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => react(item.image_id, "dislike")}
+                      >
+                        ✕
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => react(item.image_id, "save")}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            <div className={styles.progressBar}>
+              <div className={styles.progressText}>{progressText}</div>
+            </div>
+
+            {canGenerate && (
+              <div className={styles.ctaButton}>
+                <Button size="lg" fullWidth onClick={generateFinalPack}>
+                  Generate Artwork from Inspiration →
+                </Button>
+              </div>
             )}
           </div>
-
-          {useEliminationView && sessionId ? (
-            <DesignEliminationView
-              sessionId={sessionId}
-              onInteraction={(action, imageId, comparisonImageId) => react(imageId, action, comparisonImageId)}
-            />
-          ) : (
-            <div className="grid">
-              {feed.map((item) => (
-                <div className="card" key={item.image_id}>
-                  <img src={item.url} alt="candidate" style={{ width: "100%", borderRadius: 8 }} />
-                  <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => react(item.image_id, "like")}>Like</button>
-                    <button onClick={() => react(item.image_id, "dislike")}>Dislike</button>
-                    <button onClick={() => react(item.image_id, "save")}>Save</button>
-                    <button onClick={() => react(item.image_id, "this_or_that")}>This/That</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+      )}
 
-        <aside className="sidebar">
-          <h3>Session Progress</h3>
-          <p>{progressText}</p>
-          <h3>Board Sidebar</h3>
-          <p>Saved items: {saved.length}</p>
-          <ul>
-            {saved.slice(0, 8).map((id) => (
-              <li key={id}>{id.slice(0, 8)}</li>
-            ))}
-          </ul>
-          <button disabled={!canGenerate} onClick={generateFinalPack}>Generate Final Pack</button>
-          <p>{jobStatus}</p>
-        </aside>
-      </div>
+      {currentScreen === "inspiration" && (
+        <div className={styles.container}>
+          <div className={styles.centerContent}>
+            <h2 className={styles.inspirationTitle}>Your Inspiration</h2>
+            <div className={styles.savedGrid}>
+              {saved.slice(0, 3).map((id) => {
+                const item = feed.find((f) => f.image_id === id);
+                return item ? (
+                  <Card key={id} image={item.url} title={`Inspiration #${saved.indexOf(id) + 1}`} />
+                ) : null;
+              })}
+            </div>
+            <div className={styles.ctaButton}>
+              <Button size="lg" fullWidth>
+                Generate Artwork from Inspiration →
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
