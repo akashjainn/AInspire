@@ -80,6 +80,15 @@
   letter-spacing: 0.1px;
 }
 
+@media (min-width: 1024px) {
+  .lg {
+    padding: 18px 36px;
+    font-size: 16px;
+    min-height: 60px;
+    border-radius: 18px;
+  }
+}
+
 /* Disabled */
 .button:disabled {
   background: #D9D6D3;

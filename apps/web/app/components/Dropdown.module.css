@@ -17,6 +17,13 @@
   text-transform: uppercase;
 }
 
+@media (min-width: 1024px) {
+  .label {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+}
+
 .trigger {
   display: flex;
   align-items: center;
@@ -35,6 +42,15 @@
   font-family: var(--font-sora), sans-serif;
   box-shadow: none !important;
   transform: none !important;
+}
+
+@media (min-width: 1024px) {
+  .trigger {
+    height: 64px;
+    font-size: 16px;
+    border-radius: 14px;
+    padding: 0 22px;
+  }
 }
 
 .trigger:hover {
@@ -120,6 +136,13 @@
   border-radius: 0 !important;
   box-shadow: none !important;
   transform: none !important;
+}
+
+@media (min-width: 1024px) {
+  .option {
+    padding: 16px 22px;
+    font-size: 15px;
+  }
 }
 
 .option:hover {

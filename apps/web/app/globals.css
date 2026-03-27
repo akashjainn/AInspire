@@ -60,12 +60,25 @@ button:disabled {
   margin-bottom: 24px;
 }
 
+@media (min-width: 1024px) {
+  .elimination-header {
+    text-align: left;
+    margin-bottom: 32px;
+  }
+}
+
 .elimination-header h2 {
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 6px 0;
   color: #2D2A26;
   font-family: var(--font-sora), sans-serif;
+}
+
+@media (min-width: 1024px) {
+  .elimination-header h2 {
+    font-size: 28px;
+  }
 }
 
 .elimination-header p {
@@ -75,11 +88,25 @@ button:disabled {
   font-weight: 400;
 }
 
+@media (min-width: 1024px) {
+  .elimination-header p {
+    font-size: 14px;
+  }
+}
+
 .elimination-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin: 16px 0;
+}
+
+@media (min-width: 1024px) {
+  .elimination-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 32px 0;
+  }
 }
 
 .shootable-card {
@@ -94,10 +121,24 @@ button:disabled {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+@media (min-width: 1024px) {
+  .shootable-card {
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
 .shootable-card:hover {
   border-color: rgba(255, 107, 107, 0.4);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
   transform: translateY(-2px);
+}
+
+@media (min-width: 1024px) {
+  .shootable-card:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    transform: translateY(-4px);
+  }
 }
 
 .shootable-card-image {
