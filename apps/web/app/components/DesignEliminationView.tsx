@@ -7,23 +7,36 @@ interface DesignEliminationViewProps {
   sessionId: string;
   onInteraction: (action: InteractionAction, imageId: string, comparisonImageId?: string) => void;
   disabled?: boolean;
+  refreshSignal?: number;
 }
 
 const api = new ApiClient(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000");
 
-const DesignEliminationView: React.FC<DesignEliminationViewProps> = ({ sessionId, onInteraction, disabled = false }) => {
+const DesignEliminationView: React.FC<DesignEliminationViewProps> = ({
+  sessionId,
+  onInteraction,
+  disabled = false,
+  refreshSignal = 0,
+}) => {
   const [pair, setPair] = useState<[FeedItem, FeedItem] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   const loadNewPair = async () => {
     setIsLoading(true);
+    setIsEmpty(false);
     try {
       const response = await api.getFeed(sessionId, 2);
       if (response.items.length >= 2) {
         setPair([response.items[0], response.items[1]]);
+      } else {
+        setPair(null);
+        setIsEmpty(true);
       }
     } catch (error) {
       console.error("Failed to load pair:", error);
+      setPair(null);
+      setIsEmpty(true);
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +46,7 @@ const DesignEliminationView: React.FC<DesignEliminationViewProps> = ({ sessionId
     if (sessionId) {
       loadNewPair();
     }
-  }, [sessionId]);
+  }, [sessionId, refreshSignal]);
 
   const handleCardShot = (shotImageId: string, otherImageId: string) => {
     // Record the interaction: user eliminated (shot) the shotImageId
@@ -46,6 +59,17 @@ const DesignEliminationView: React.FC<DesignEliminationViewProps> = ({ sessionId
   };
 
   if (isLoading || !pair) {
+    if (isEmpty) {
+      return (
+        <div className="elimination-loading">
+          <p>No comparison pair is available right now.</p>
+          <button onClick={loadNewPair} disabled={disabled} style={{ marginTop: 12 }}>
+            Reload Comparison
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="elimination-loading">
         <p>Loading designs to compare...</p>

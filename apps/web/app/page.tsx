@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { ApiClient } from "@ainspire/api-client";
 import type { ArtifactType, FeedItem, InteractionAction } from "@ainspire/types";
@@ -59,7 +59,29 @@ const previewGradients = [
 
 type Screen = "creation" | "elimination" | "inspiration" | "choosestyles";
 
-// ─── Swipe Card ──────────────────────────────────────────────────────────────
+// Generate test feed
+function generateTestFeed(count: number = 8): FeedItem[] {
+  return TEST_IMAGES.slice(0, count).map((url, i) => ({
+    image_id: `test-${Date.now()}-${i}`,
+    url,
+    score: 0.5,
+    explanation: { source: "demo" },
+    attributes: { slot: i },
+  }));
+}
+
+// Generate test generated items
+function generateTestGeneratedItems(count: number = 4): FeedItem[] {
+  return TEST_GENERATED_IMAGES.slice(0, count).map((url, i) => ({
+    image_id: `generated-${Date.now()}-${i}`,
+    url,
+    score: 0.8,
+    explanation: { source: "demo-generated" },
+    attributes: { slot: i },
+  }));
+}
+
+// ─── Swipe Card ─────────────────────────────────────────────────────────────
 
 interface SwipeCardProps {
   item: FeedItem;
@@ -72,11 +94,6 @@ function SwipeCard({ item, onAction, isSaved }: SwipeCardProps) {
   const rotate = useTransform(x, [-120, 0, 120], [-16, 0, 16]);
   const saveOpacity = useTransform(x, [20, 80], [0, 1]);
   const skipOpacity = useTransform(x, [-80, -20], [1, 0]);
-  const [dismissed, setDismissed] = useState(false);
-
-  if (dismissed) {
-    return <div className={styles.swipeCardGhost} />;
-  }
 
   return (
     <motion.div
@@ -85,12 +102,10 @@ function SwipeCard({ item, onAction, isSaved }: SwipeCardProps) {
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.12}
-      onDragEnd={(_, info) => {
+      onDragEnd={(_: unknown, info: { offset: { x: number } }) => {
         if (info.offset.x > 80) {
-          setDismissed(true);
           onAction(item.image_id, "save");
         } else if (info.offset.x < -80) {
-          setDismissed(true);
           onAction(item.image_id, "dislike");
         }
       }}
@@ -107,10 +122,10 @@ function SwipeCard({ item, onAction, isSaved }: SwipeCardProps) {
         <div className={styles.swipeCardFallback} />
       )}
       <motion.div className={styles.saveOverlay} style={{ opacity: saveOpacity }}>
-        <span>SAVE</span>
+        <span>♥ SAVE</span>
       </motion.div>
       <motion.div className={styles.skipOverlay} style={{ opacity: skipOpacity }}>
-        <span>SKIP</span>
+        <span>✕ SKIP</span>
       </motion.div>
       {isSaved && (
         <div className={styles.savedBadge}>
@@ -124,7 +139,36 @@ function SwipeCard({ item, onAction, isSaved }: SwipeCardProps) {
   );
 }
 
-// ─── Breadcrumb Navigation ────────────────────────────────────────────────────
+function StepRail({ currentScreen }: { currentScreen: Screen }) {
+  const steps: Array<{ id: Screen; label: string }> = [
+    { id: "creation", label: "Create" },
+    { id: "elimination", label: "Select" },
+    { id: "inspiration", label: "Review" },
+    { id: "choosestyles", label: "Finalize" },
+  ];
+
+  const activeIndex = steps.findIndex((s) => s.id === currentScreen);
+
+  return (
+    <div className={styles.stepRail} aria-label="AInspire workflow progress">
+      {steps.map((step, index) => (
+        <div key={step.id} className={styles.stepItem}>
+          <div
+            className={`${styles.stepDot} ${index <= activeIndex ? styles.stepDotActive : ""}`}
+            aria-hidden="true"
+          >
+            {index + 1}
+          </div>
+          <span className={`${styles.stepLabel} ${index === activeIndex ? styles.stepLabelActive : ""}`}>
+            {step.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Breadcrumb Navigation ──────────────────────────────────────────────────
 
 interface BreadcrumbProps {
   currentScreen: Screen;
@@ -133,9 +177,9 @@ interface BreadcrumbProps {
 function Breadcrumb({ currentScreen }: BreadcrumbProps) {
   const breadcrumbs: Record<Screen, string> = {
     creation: "Home",
-    elimination: "Elimination",
-    inspiration: "Inspiration",
-    choosestyles: "Results",
+    elimination: "Eliminate Styles",
+    inspiration: "Saved Inspiration",
+    choosestyles: "Generated Artwork",
   };
 
   return (
@@ -145,7 +189,7 @@ function Breadcrumb({ currentScreen }: BreadcrumbProps) {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function HomePage() {
   const [artifact, setArtifact] = useState<ArtifactType>("painting");
@@ -159,43 +203,58 @@ export default function HomePage() {
   const [useEliminationView, setUseEliminationView] = useState(false);
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
   const [artworkSaved, setArtworkSaved] = useState<Set<string>>(new Set());
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const demoSeed = useRef(0);
 
   const canGenerate = saved.length >= 5 && interactions >= 20;
   const progressPercent = Math.min(100, Math.round((interactions / 20) * 100));
   const savedItems = feed.filter((f) => saved.includes(f.image_id));
   const selectedArtwork = feed.find((f) => f.image_id === selectedArtworkId) ?? null;
 
-  // Generate test feed items
-  function generateTestFeed() {
-    return TEST_IMAGES.map((url, i) => ({
-      image_id: `test-${i}`,
-      url,
-      rank: i,
-    }));
+  function makeDemoFeedItem(prefix: "test" | "generated" = "test"): FeedItem {
+    const source = prefix === "generated" ? TEST_GENERATED_IMAGES : TEST_IMAGES;
+    const index = demoSeed.current % source.length;
+    demoSeed.current += 1;
+    return {
+      image_id: `${prefix}-${Date.now()}-${demoSeed.current}`,
+      url: source[index],
+      score: prefix === "generated" ? 0.8 : 0.5,
+      explanation: { source: prefix === "generated" ? "demo-generated" : "demo" },
+      attributes: { slot: demoSeed.current },
+    };
   }
 
-  // Generate test generated items
-  function generateTestGeneratedItems() {
-    return TEST_GENERATED_IMAGES.map((url, i) => ({
-      image_id: `generated-${i}`,
-      url,
-      rank: i,
-    }));
+  function refillGridAfterSwipe(imageId: string) {
+    setFeed((currentFeed) => {
+      const remaining = currentFeed.filter((item) => item.image_id !== imageId);
+      if (currentScreen !== "elimination" || useEliminationView) {
+        return remaining;
+      }
+
+      const replenished = [...remaining, makeDemoFeedItem("test")];
+      return replenished.slice(0, 8);
+    });
   }
 
   async function startSession() {
+    setIsLoadingSession(true);
     try {
       const session = await api.startSession({ artifact_type: artifact, vibe_chips: selectedChips });
       setSessionId(session.id);
-      // Use test feed for demo
-      const testFeed = generateTestFeed();
-      setFeed(testFeed as any);
+      setIsDemoMode(false);
+      const response = await api.getFeed(session.id, 10);
+      setFeed(response.items);
     } catch {
-      // Demo mode — use test feed
+      // Demo mode - use test feed
       const testFeed = generateTestFeed();
       setFeed(testFeed as any);
+      setSessionId("");
+      setIsDemoMode(true);
     }
+    setIsLoadingSession(false);
     setCurrentScreen("elimination");
   }
 
@@ -204,7 +263,13 @@ export default function HomePage() {
     if (action === "save") {
       setSaved((c) => (c.includes(imageId) ? c : [...c, imageId]));
     }
-    if (!sessionId) return;
+
+    refillGridAfterSwipe(imageId);
+
+    if (!sessionId || isDemoMode) {
+      return;
+    }
+
     try {
       await api.recordInteraction({
         session_id: sessionId,
@@ -212,32 +277,67 @@ export default function HomePage() {
         action_type: action,
         comparison_image_id: comparisonId,
       });
-      // Use test feed for demo
-      const testFeed = generateTestFeed();
-      setFeed(testFeed as any);
+      const response = await api.getFeed(sessionId, 10);
+      setFeed(response.items);
     } catch {
-      // Demo mode — use test feed
-      const testFeed = generateTestFeed();
-      setFeed(testFeed as any);
+      // API hiccup fallback keeps the flow moving.
+      setIsDemoMode(true);
+      setFeed((currentFeed) => {
+        if (currentFeed.length > 0) return currentFeed;
+        return generateTestFeed() as any;
+      });
     }
   }
 
   async function generateFinalPack() {
     setIsGenerating(true);
-    if (sessionId) {
+    if (sessionId && !isDemoMode) {
       try {
         await api.generateFinalPack(sessionId);
       } catch {
         // continue
       }
     }
-    // Simulate generation delay
-    setTimeout(() => {
-      const testGenerated = generateTestGeneratedItems();
-      setFeed(testGenerated as any);
-      setIsGenerating(false);
-      setCurrentScreen("choosestyles");
-    }, 1500);
+
+    // Simulate generation with delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const testGenerated = Array.from({ length: 4 }, () => makeDemoFeedItem("generated"));
+    setFeed(testGenerated as any);
+    setIsGenerating(false);
+    setCurrentScreen("choosestyles");
+  }
+
+  async function refreshCurrentStep() {
+    if (currentScreen === "elimination") {
+      if (!isDemoMode && sessionId) {
+        try {
+          const response = await api.getFeed(sessionId, 10);
+          setFeed(response.items);
+          setRefreshSignal((v) => v + 1);
+          return;
+        } catch {
+          setIsDemoMode(true);
+        }
+      }
+      setFeed(generateTestFeed() as any);
+      setRefreshSignal((v) => v + 1);
+      return;
+    }
+
+    if (currentScreen === "choosestyles") {
+      const regenerated = Array.from({ length: 4 }, () => makeDemoFeedItem("generated"));
+      setFeed(regenerated as any);
+      setSelectedArtworkId(null);
+      return;
+    }
+
+    if (currentScreen === "inspiration") {
+      setCurrentScreen("elimination");
+      return;
+    }
+
+    goHome();
   }
 
   function toggleSaveArtwork(id: string) {
@@ -250,6 +350,7 @@ export default function HomePage() {
   }
 
   function goHome() {
+    // Reset all state completely
     setCurrentScreen("creation");
     setArtifact("painting");
     setSelectedChips([]);
@@ -260,13 +361,21 @@ export default function HomePage() {
     setSelectedArtworkId(null);
     setArtworkSaved(new Set());
     setSidebarOpen(false);
+    setUseEliminationView(false);
+    setIsLoadingSession(false);
+    setIsGenerating(false);
+    setIsDemoMode(false);
+    setRefreshSignal(0);
   }
 
   const sidebarItems = [
     {
       label: "View Saved",
       icon: "bookmark" as const,
-      onClick: () => setCurrentScreen("inspiration"),
+      onClick: () => {
+        setCurrentScreen("inspiration");
+        setSidebarOpen(false);
+      },
     },
     { label: "Account", icon: "user" as const },
     { label: "Archive", icon: "archive" as const },
@@ -284,7 +393,8 @@ export default function HomePage() {
         <Header
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           onHomeClick={goHome}
-          isHome={currentScreen !== "creation"}
+          onRefreshClick={refreshCurrentStep}
+          isHome={currentScreen === "creation"}
         />
         <Sidebar
           isOpen={sidebarOpen}
@@ -292,14 +402,13 @@ export default function HomePage() {
           items={sidebarItems}
         />
 
-        <Breadcrumb currentScreen={currentScreen} />
+        {currentScreen !== "creation" && <Breadcrumb currentScreen={currentScreen} />}
+        <StepRail currentScreen={currentScreen} />
 
         <main className={styles.main}>
           <AnimatePresence mode="wait">
 
-            {/* ═══════════════════════════════════════════════
-                CREATION SCREEN
-            ═══════════════════════════════════════════════ */}
+            {/* CREATION SCREEN */}
             {currentScreen === "creation" && (
               <motion.div
                 key="creation"
@@ -310,7 +419,6 @@ export default function HomePage() {
                 exit="exit"
               >
                 <div className={styles.creationScreen}>
-                  {/* Visual preview area */}
                   <div className={styles.previewArea}>
                     <div className={styles.previewGrid}>
                       {previewGradients.map((bg, i) => (
@@ -325,13 +433,15 @@ export default function HomePage() {
                       ))}
                     </div>
                     <p className={styles.previewLabel}>
-                      AI learns your aesthetic through visual choices
+                      AInspire learns your style through simple visual choices.
                     </p>
                   </div>
 
-                  {/* Form */}
                   <div className={styles.formSection}>
                     <h2 className={styles.formTitle}>What are you creating today?</h2>
+                    <p className={styles.formSupportText}>
+                      Pick one output type, tap a few vibe words, then start. You can change everything later.
+                    </p>
 
                     <div className={styles.formGroup}>
                       <Dropdown
@@ -365,17 +475,20 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <Button size="lg" fullWidth onClick={startSession}>
-                      Start Creating
+                    <Button
+                      size="lg"
+                      fullWidth
+                      onClick={startSession}
+                      disabled={isLoadingSession}
+                    >
+                      {isLoadingSession ? "Preparing your style board..." : "Start Guided Flow"}
                     </Button>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {/* ═══════════════════════════════════════════════
-                ELIMINATION SCREEN
-            ═══════════════════════════════════════════════ */}
+            {/* ELIMINATION SCREEN */}
             {currentScreen === "elimination" && (
               <motion.div
                 key="elimination"
@@ -386,10 +499,15 @@ export default function HomePage() {
                 exit="exit"
               >
                 <div className={styles.eliminationScreen}>
-                  <h2 className={styles.screenTitle}>Eliminate styles you don't like</h2>
-                  <p className={styles.swipeHint}>← Swipe to skip &nbsp;·&nbsp; Swipe to save →</p>
+                  <h2 className={styles.screenTitle}>Pick what feels right</h2>
+                  <p className={styles.swipeHint}>Swipe left to remove · Swipe right to save · or use Compare mode for side-by-side decisions.</p>
 
-                  {/* View mode toggle */}
+                  <div className={styles.helperBanner}>
+                    <p>
+                      Tip: save at least <strong>5</strong> styles and make <strong>20</strong> choices for the best generation quality.
+                    </p>
+                  </div>
+
                   <div className={styles.viewToggle}>
                     <button
                       className={`${styles.toggleBtn} ${
@@ -409,9 +527,10 @@ export default function HomePage() {
                     </button>
                   </div>
 
-                  {useEliminationView && sessionId ? (
+                  {useEliminationView && sessionId && !isDemoMode ? (
                     <DesignEliminationView
                       sessionId={sessionId}
+                      refreshSignal={refreshSignal}
                       onInteraction={(action, imageId, comparisonImageId) =>
                         recordInteraction(imageId, action, comparisonImageId)
                       }
@@ -419,9 +538,11 @@ export default function HomePage() {
                   ) : (
                     <div className={styles.cardGrid}>
                       {feed.length === 0 ? (
-                        <p className={styles.emptyState}>
-                          No styles loaded yet. Start a session to see designs.
-                        </p>
+                        <div className={styles.emptyStateContainer}>
+                          <p className={styles.emptyState}>
+                            No styles loaded yet. Start a session to see designs.
+                          </p>
+                        </div>
                       ) : (
                         feed.map((item) => (
                           <SwipeCard
@@ -435,7 +556,6 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* Progress */}
                   <div className={styles.progressRow}>
                     <span className={styles.progressText}>{interactions}/20</span>
                     <div className={styles.progressTrack}>
@@ -447,10 +567,15 @@ export default function HomePage() {
                     <span className={styles.progressText}>{saved.length}/5 saved</span>
                   </div>
 
+                  <div className={styles.quickActionRow}>
+                    <Button size="md" variant="outline" onClick={refreshCurrentStep}>Refresh Styles</Button>
+                    <Button size="md" variant="secondary" onClick={() => setCurrentScreen("inspiration")}>See Saved</Button>
+                  </div>
+
                   <div className={styles.ctaGroup}>
                     {canGenerate ? (
                       <Button size="lg" fullWidth onClick={generateFinalPack} disabled={isGenerating}>
-                        {isGenerating ? "Generating..." : "Generate Artwork from Inspiration →"}
+                        {isGenerating ? "✨ Generating your artwork..." : "Generate Artwork from Inspiration →"}
                       </Button>
                     ) : (
                       <Button
@@ -467,9 +592,7 @@ export default function HomePage() {
               </motion.div>
             )}
 
-            {/* ═══════════════════════════════════════════════
-                INSPIRATION SCREEN — "Your inspiration"
-            ═══════════════════════════════════════════════ */}
+            {/* INSPIRATION SCREEN */}
             {currentScreen === "inspiration" && (
               <motion.div
                 key="inspiration"
@@ -498,6 +621,7 @@ export default function HomePage() {
                   </button>
 
                   <h2 className={styles.sectionTitle}>Your inspiration</h2>
+                    <p className={styles.screenSupport}>Everything you saved appears here. Review before final generation.</p>
 
                   <div className={styles.inspirationList}>
                     {savedItems.length === 0 ? (
@@ -541,18 +665,16 @@ export default function HomePage() {
                       size="lg"
                       fullWidth
                       onClick={generateFinalPack}
-                      disabled={savedItems.length < 1}
+                      disabled={savedItems.length < 1 || isGenerating}
                     >
-                      Generate Artwork from Inspiration →
+                      {isGenerating ? "Generating your curated set..." : "Generate Artwork from Inspiration →"}
                     </Button>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {/* ═══════════════════════════════════════════════
-                CHOOSE STYLES SCREEN
-            ═══════════════════════════════════════════════ */}
+            {/* CHOOSE STYLES SCREEN */}
             {currentScreen === "choosestyles" && (
               <motion.div
                 key="choosestyles"
@@ -563,7 +685,6 @@ export default function HomePage() {
                 exit="exit"
               >
                 {selectedArtworkId && selectedArtwork ? (
-                  /* ─── Detail view ─── */
                   <div className={styles.detailScreen}>
                     <button
                       className={styles.backBtn}
@@ -601,13 +722,14 @@ export default function HomePage() {
                         <button
                           className={styles.detailActionBtn}
                           onClick={() => toggleSaveArtwork(selectedArtwork.image_id)}
+                          title={artworkSaved.has(selectedArtwork.image_id) ? "Unsave" : "Save artwork"}
                         >
                           <svg
                             width="18"
                             height="18"
                             viewBox="0 0 24 24"
-                            fill={artworkSaved.has(selectedArtwork.image_id) ? "#2D2A26" : "none"}
-                            stroke="#2D2A26"
+                            fill={artworkSaved.has(selectedArtwork.image_id) ? "#FF6B6B" : "none"}
+                            stroke="#FF6B6B"
                             strokeWidth="2"
                           >
                             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -616,7 +738,7 @@ export default function HomePage() {
                             {artworkSaved.has(selectedArtwork.image_id) ? "Saved" : "Save"}
                           </span>
                         </button>
-                        <button className={styles.detailActionBtn}>
+                        <button className={styles.detailActionBtn} title="Share artwork">
                           <svg
                             width="18"
                             height="18"
@@ -634,13 +756,14 @@ export default function HomePage() {
                         <button
                           className={styles.detailActionBtn}
                           onClick={() => recordInteraction(selectedArtwork.image_id, "like")}
+                          title="Like artwork"
                         >
                           <svg
                             width="18"
                             height="18"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#2D2A26"
+                            stroke="#FF6B6B"
                             strokeWidth="2"
                           >
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -674,23 +797,26 @@ export default function HomePage() {
                     )}
                   </div>
                 ) : (
-                  /* ─── Grid view ─── */
                   <div className={styles.chooseScreen}>
                     <h2 className={styles.sectionTitle}>
                       Choose styles from generated artwork
                     </h2>
+                    <p className={styles.screenSupport}>Tap any result to inspect details, save favorites, and iterate fast.</p>
 
                     <div className={styles.chooseGrid}>
                       {feed.length === 0 ? (
-                        <p className={styles.emptyState}>
-                          Generating artwork from your inspiration…
-                        </p>
+                        <div className={styles.emptyStateContainer}>
+                          <p className={styles.emptyState}>
+                            {isGenerating ? "✨ Generating your personalized artwork..." : "No artwork generated yet."}
+                          </p>
+                        </div>
                       ) : (
                         feed.map((item) => (
                           <motion.button
                             key={item.image_id}
                             className={styles.artworkCard}
                             onClick={() => setSelectedArtworkId(item.image_id)}
+                            whileHover={{ y: -6, transition: { duration: 0.2 } }}
                             whileTap={{ scale: 0.95 }}
                           >
                             {item.url ? (
@@ -737,6 +863,11 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
+
+                    <div className={styles.quickActionRow}>
+                      <Button size="md" variant="outline" onClick={refreshCurrentStep}>Regenerate Variants</Button>
+                      <Button size="md" variant="secondary" onClick={goHome}>Start New Project</Button>
+                    </div>
                   </div>
                 )}
               </motion.div>

@@ -2,16 +2,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 10px;
+  padding: 16px 20px 12px;
   background: #FFF7ED;
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(45, 42, 38, 0.06);
 }
 
 @media (min-width: 1024px) {
   .header {
-    padding: 24px 60px;
+    padding: 20px 60px 16px;
     border-bottom: 1px solid rgba(45, 42, 38, 0.08);
   }
 }
@@ -88,27 +89,30 @@
   box-shadow: none !important;
 }
 
+.homeButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .titleArea {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 0;
 }
 
 @media (min-width: 1024px) {
   .titleArea {
-    flex: 0;
-    align-items: flex-start;
-    gap: 2px;
+    align-items: center;
   }
 }
 
 .titleContent {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
 }
 
@@ -116,6 +120,14 @@
   .titleContent {
     gap: 10px;
   }
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
 }
 
 .iconWrapper {
@@ -142,7 +154,7 @@
 }
 
 .title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   margin: 0;
   background: linear-gradient(90deg, #FF6B6B 0%, rgba(155, 93, 229, 0.73) 100%);
@@ -156,25 +168,67 @@
 
 @media (min-width: 1024px) {
   .title {
-    font-size: 32px;
+    font-size: 30px;
   }
 }
 
 .subtitle {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 500;
   color: #2D2A26;
   margin: 0;
   font-family: var(--font-sora), sans-serif;
   line-height: 1;
+  opacity: 0.7;
+  letter-spacing: 0.2px;
 }
 
 @media (min-width: 1024px) {
   .subtitle {
-    font-size: 13px;
-    font-weight: 600;
-    opacity: 0.7;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.65;
+    letter-spacing: 0.3px;
   }
+}
+
+.rightActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refreshButton {
+  background: transparent !important;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: background-color 0.18s ease;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  box-shadow: none !important;
+  transform: none !important;
+  color: #2D2A26;
+}
+
+.refreshButton:hover {
+  background-color: rgba(45, 42, 38, 0.08) !important;
+  color: #FF6B6B;
+}
+
+.refreshButton:active {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.refreshButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .profileButton {

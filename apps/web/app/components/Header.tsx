@@ -4,6 +4,7 @@ import styles from './Header.module.css';
 interface HeaderProps {
   onMenuClick?: () => void;
   onHomeClick?: () => void;
+  onRefreshClick?: () => void;
   title?: string;
   showSubtitle?: boolean;
   isHome?: boolean;
@@ -12,6 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   onMenuClick,
   onHomeClick,
+  onRefreshClick,
   title = 'AInspire',
   showSubtitle = true,
   isHome = true,
@@ -33,14 +35,14 @@ export const Header: React.FC<HeaderProps> = ({
       <button
         className={styles.homeButton}
         onClick={onHomeClick}
+        disabled={isHome}
         aria-label="Home"
-        title="Back to home"
+        title={isHome ? "You are already on home" : "Back to home"}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-          <path d="M21 3v5h-5" />
-          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-          <path d="M3 21v-5h5" />
+          <path d="M3 10.5 12 3l9 7.5" />
+          <path d="M5 9.5V21h14V9.5" />
+          <path d="M9.5 21v-6h5v6" />
         </svg>
       </button>
 
@@ -55,19 +57,35 @@ export const Header: React.FC<HeaderProps> = ({
               className={styles.icon}
             />
           </div>
-          <h1 className={styles.title}>{title}</h1>
+          <div className={styles.wordmark}>
+            <h1 className={styles.title}>{title}</h1>
+            {showSubtitle && <p className={styles.subtitle}>Create with AInspire AI</p>}
+          </div>
         </div>
-        {showSubtitle && <p className={styles.subtitle}>Create with AI</p>}
       </div>
 
-      <button className={styles.profileButton} aria-label="Profile">
-        <span className={styles.profileRing}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="white" />
+      <div className={styles.rightActions}>
+        <button
+          className={styles.refreshButton}
+          onClick={onRefreshClick}
+          aria-label="Refresh current step"
+          title="Refresh current step"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <path d="M21 3v6h-6" />
           </svg>
-        </span>
-      </button>
+        </button>
+
+        <button className={styles.profileButton} aria-label="Profile">
+          <span className={styles.profileRing}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="white" />
+            </svg>
+          </span>
+        </button>
+      </div>
     </header>
   );
 };
