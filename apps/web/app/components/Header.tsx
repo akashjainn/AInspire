@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -27,7 +28,18 @@ export const Header: React.FC<HeaderProps> = ({
       </button>
 
       <div className={styles.titleArea}>
-        <h1 className={styles.title}>{title}</h1>
+        <div className={styles.titleContent}>
+          <div className={styles.iconWrapper}>
+            <Image
+              src="/frame.png"
+              alt="AInspire"
+              width={28}
+              height={28}
+              priority
+            />
+          </div>
+          <h1 className={styles.title}>{title}</h1>
+        </div>
         {showSubtitle && <p className={styles.subtitle}>Create with AI</p>}
       </div>
 
